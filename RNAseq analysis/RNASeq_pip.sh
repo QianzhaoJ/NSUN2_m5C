@@ -24,8 +24,7 @@ then
   echo "*                  -I [The file of STAR index files]                                       *"
   echo "* Inputs: The raw fastq files                                                              *"
   echo "* Run: Default to run trim_galore,fastqc,hisat2,sam2bam,featureCounts & deeptools          *"
-  echo "*      Figures will be generated in /plots folder, and bigWig files in /tracks folder      *"
-  echo "* Outputs: All output files will be generated in the same folder as the pipeline submitted *"
+  echo "* Outputs: All output files will be generated in the outputpath                            *"
   echo "* This pipeline requires 'conda activate daily'                                            *"
   echo "********************************************************************************************"
   exit 1
@@ -139,10 +138,8 @@ echo "**************************************************************************
 echo "3.2. Mapping using STAR"
 
 mkdir -p $STARout
+STAR --genomeDir $STARindex --readFilesCommand zcat --outSAMtype BAM SortedByCoordinate --runThreadN $CPU --readFilesIn $clean1 $clean2 --outSAMunmapped None --outFileNamePrefix $STARout/${sample}.STAR. --winAnchorMultimapNmax 100 --outFilterMultimapNmax 100 --outFilterMismatchNoverLmax 0.04 --outFilterType BySJout 
 
-#STAR --genomeDir $STARindex --readFilesCommand zcat --outSAMtype BAM SortedByCoordinate --runThreadN $CPU --readFilesIn $clean1 $clean2 --outSAMunmapped None --outFileNamePrefix $STARout/${sample}.STAR. --winAnchorMultimapNmax 100 --outFilterMultimapNmax 100 --outFilterMismatchNoverLmax 0.04 --outFilterType BySJout 
-
-#STAR --runThreadN 24 --genomeDir $STARindex --outSAMtype BAM SortedByCoordinate --runMode alignReads --outFilterMultimapNmax 1000 --outSAMmultNmax 1 --outFilterMismatchNmax 3 --outMultimapperOrder Random --winAnchorMultimapNmax 1000 --alignEndsType EndToEnd --alignIntronMax 1--alignMatesGapMax 350 --readFilesIn $clean1 $clean2 --readFilesCommand zcat --outFileNamePrefix $STARout/${sample}.STAR.
 echo "*****************************************************************************"
 echo "4. assigning sequence reads to genomic features"
 
@@ -161,7 +158,7 @@ repeat_log=$repeat/logs/${sample}.log
 repeat_out=$repeat/$sample
 mkdir -p $repeat_out
 
-#featureCounts -M -T $CPU -p -t exon -g gene_id -a $REgtf -o $repeat_out/${sample}.RE.txt $STARbam
+featureCounts -M -T $CPU -p -t exon -g gene_id -a $REgtf -o $repeat_out/${sample}.RE.txt $STARbam
 
 echo "*****************************************************************************"
 echo "6. Quantitation of RNA-Seq data using stringtie"
